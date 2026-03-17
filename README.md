@@ -1,15 +1,12 @@
 <p align="center">
   <img src="https://github.com/CanReader/SleakEngine/blob/main/logo.png" alt="SleakEngine" width="200">
 </p>
-
 <h1 align="center">SleakEngine Empty Template</h1>
-
 <p align="center">
   <strong>Starter template for building games with SleakEngine</strong>
   <br />
-  Clone, build, and start writing game logic immediately.
+  Use this template, build, and start writing game logic immediately.
 </p>
-
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge" alt="License"></a>
   <a href="https://github.com/CanReader/SleakEngine"><img src="https://img.shields.io/badge/C%2B%2B-23-00599C?style=for-the-badge&logo=cplusplus&logoColor=white" alt="C++23"></a>
@@ -40,11 +37,19 @@ All engine dependencies are vendored &mdash; no package manager needed.
 
 ## Quick Start
 
-### Clone
+### 1. Create Your Repository
+
+Click the **"Use this template"** button at the top of this page and select **"Create a new repository"**.
+
+> **Why not fork?** Forking is for contributing back to the original. Using the template gives you a clean, independent repo with no link to this one — your game is yours entirely.
+
+Name it after your game, choose public or private, and hit create.
+
+### 2. Clone Your New Repository
 
 ```bash
-git clone --recurse-submodules https://github.com/CanReader/SleakEngine-Empty.git
-cd SleakEngine-Empty
+git clone --recurse-submodules https://github.com/YourUsername/YourGameName.git
+cd YourGameName
 git submodule update --remote
 ```
 
@@ -54,14 +59,12 @@ git submodule update --remote
 > ```
 
 ### Build
-
 ```bash
 cmake --preset debug
 cmake --build --preset debug
 ```
 
 For an optimized build:
-
 ```bash
 cmake --preset release
 cmake --build --preset release
@@ -70,7 +73,6 @@ cmake --build --preset release
 Output goes to `bin/` with all assets and runtime libraries in place.
 
 ### Run
-
 ```bash
 ./bin/SleakEngine -w 1280 -h 720 -t My_Game
 ```
@@ -84,7 +86,7 @@ Output goes to `bin/` with all assets and runtime libraries in place.
 ## Project Structure
 
 ```
-SleakEngine-Empty/
+YourGameName/
 ├── CMakePresets.json      Build presets (debug / release)
 ├── Engine/                SleakEngine core (git submodule)
 │   ├── include/           Public & private headers
