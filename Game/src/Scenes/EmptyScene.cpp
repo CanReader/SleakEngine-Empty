@@ -5,6 +5,7 @@
 #include "ECS/Components/MaterialComponent.hpp"
 #include "Math/Vector.hpp"
 #include <Lighting/DirectionalLight.hpp>
+#include <Lighting/PointLight.hpp>
 #include <Lighting/LightManager.hpp>
 #include <Runtime/Material.hpp>
 #include <Runtime/Skybox.hpp>
@@ -34,16 +35,12 @@ void EmptyScene::OnDeactivate() {
 
 void EmptyScene::Begin() {
 
-    // --- Material ---
+    // --- Material (PBR) ---
     auto* mat = new Sleak::Material();
     mat->SetShader("assets/shaders/default_shader.hlsl");
-    mat->SetDiffuseColor(
-        (uint8_t)255, (uint8_t)255, (uint8_t)255);
-    mat->SetSpecularColor(
-        (uint8_t)255, (uint8_t)255, (uint8_t)255);
-    mat->SetShininess(32.0f);
+    mat->SetDiffuseColor((uint8_t)230, (uint8_t)230, (uint8_t)230);
     mat->SetMetallic(0.0f);
-    mat->SetRoughness(0.5f);
+    mat->SetRoughness(0.35f);
     mat->SetAO(1.0f);
     mat->SetOpacity(1.0f);
     auto cubeMaterial = Sleak::RefPtr<Sleak::Material>(mat);
@@ -67,36 +64,57 @@ void EmptyScene::Begin() {
     });
     SetSkybox(skybox);
 
-    // --- Directional light (sun) ---
+    // --- Sun (key light) ---
     auto* sun = new Sleak::DirectionalLight("Sun");
-    sun->SetDirection(Sleak::Math::Vector3D(-0.4f, -0.8f, -0.4f));
-    sun->SetColor(1.0f, 0.98f, 0.95f);
-    sun->SetIntensity(5.0f);
+    sun->SetDirection(Sleak::Math::Vector3D(-0.5f, -0.75f, -0.3f));
+    sun->SetColor(1.0f, 0.95f, 0.85f);    // Warm sunlight
+    sun->SetIntensity(4.0f);
     AddObject(sun);
 
-    // --- Ambient lighting ---
+    // --- Fill light (simulates sky bounce from opposite side) ---
+    auto* fill = new Sleak::DirectionalLight("FillLight");
+    fill->SetDirection(Sleak::Math::Vector3D(0.5f, -0.3f, 0.4f));
+    fill->SetColor(0.6f, 0.75f, 1.0f);    // Cool sky blue
+    fill->SetIntensity(0.8f);
+    AddObject(fill);
+
+    // --- Rim/back light (edge definition) ---
+    auto* rim = new Sleak::DirectionalLight("RimLight");
+    rim->SetDirection(Sleak::Math::Vector3D(0.2f, -0.4f, 0.8f));
+    rim->SetColor(1.0f, 0.9f, 0.8f);
+    rim->SetIntensity(1.2f);
+    AddObject(rim);
+
+    // --- Ambient & atmosphere ---
     auto* lm = GetLightManager();
     if (lm) {
-        lm->SetAmbientColor(0.15f, 0.15f, 0.2f);
-        lm->SetAmbientIntensity(1.0f);
+        lm->SetAmbientColor(0.08f, 0.10f, 0.15f);  // Dark blue-ish ambient
+        lm->SetAmbientIntensity(0.6f);               // Low — let directional lights do the work
+        lm->SetFogColor(0.55f, 0.62f, 0.78f);        // Soft atmospheric haze
+        lm->SetFogDistances(40.0f, 100.0f);
+        lm->SetFogEnabled(true);
     }
 
-    // --- Camera: look at the cube ---
-    if (GetDebugCamera()) {
-        Sleak::Math::Vector3D camPos(-5.0f, 3.0f, -5.0f);
-        Sleak::Math::Vector3D cubePos(0.0f, 0.0f, 0.0f);
-        Sleak::Math::Vector3D forward = (cubePos - camPos).Normalized();
+    // --- Camera ---
+    Sleak::Math::Vector3D camPos(-5.0f, 3.0f, -5.0f);
+    Sleak::Math::Vector3D cubePos(0.0f, 0.0f, 0.0f);
+    Sleak::Math::Vector3D forward = (cubePos - camPos).Normalized();
 
-        GetDebugCamera()->SetPosition(camPos);
-        GetDebugCamera()->SetLookTarget(cubePos);
+    auto* camera = new Sleak::Camera("MainCamera", camPos, 60.0f, 0.01f, 200.0f);
+    camera->SetLookTarget(cubePos);
+    camera->AddComponent<Sleak::FreeLookCameraController>();
+    camera->Initialize();
+    camera->GetComponent<Sleak::FreeLookCameraController>()->SetEnabled(true);
 
-        // Set the FreeLookController's yaw/pitch to match, otherwise it overrides on first frame
-        auto* controller = GetDebugCamera()->GetComponent<Sleak::FreeLookCameraController>();
-        if (controller) {
-            controller->SetYaw(atan2(forward.GetX(), forward.GetZ()));
-            controller->SetPitch(-asin(forward.GetY()));
-        }
+    // Sync FreeLookController yaw/pitch to initial look direction
+    auto* controller = camera->GetComponent<Sleak::FreeLookCameraController>();
+    if (controller) {
+        controller->SetYaw(atan2(forward.GetX(), forward.GetZ()));
+        controller->SetPitch(-asin(forward.GetY()));
     }
+
+    AddObject(camera);
+    SetActiveCamera(camera);
 
     Scene::Begin();
 }
