@@ -4,7 +4,6 @@ bin/
 
 # IDE and editor files
 .vs/
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -12,6 +11,7 @@ bin/
 *.sublime-project
 *.sublime-workspace
 .cache/
+.claude/
 
 # Compiled objects
 *.o
