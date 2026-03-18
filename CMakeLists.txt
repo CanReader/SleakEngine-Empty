@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.31)
-project(SleakEngine)
+project(SleakEngine LANGUAGES CXX)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
@@ -18,7 +18,10 @@ endforeach()
 endif()
 
 if(MSVC)
-    add_compile_options(/utf-8)
+    # Set via CMAKE_CXX_FLAGS so vendored libs (assimp) can detect it
+    # and avoid adding conflicting /source-charset:utf-8
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /utf-8")
 endif()
 
 option(USE_MINGW "Build using MinGW for Windows" OFF)
